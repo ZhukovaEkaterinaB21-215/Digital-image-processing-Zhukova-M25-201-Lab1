@@ -1,0 +1,17 @@
+Test: Gradient Image (0-255)
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 65536
+
+--- Statistical Metrics ---
+Mean: 127.5
+Variance: 5461.25
+Std Dev: 73.9003
+Quartiles (Q1, Q2, Q3): 63, 127, 191
+Entropy: 8
+Energy: 0.00390625
+Skewness: 0
+Kurtosis (Excess): -1.20004
+

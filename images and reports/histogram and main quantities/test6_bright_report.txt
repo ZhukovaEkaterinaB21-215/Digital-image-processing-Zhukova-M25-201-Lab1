@@ -1,0 +1,17 @@
+Test: Bright Image (200-255)
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 10000
+
+--- Statistical Metrics ---
+Mean: 227.031
+Variance: 248.206
+Std Dev: 15.7546
+Quartiles (Q1, Q2, Q3): 213, 227, 241
+Entropy: 5.77692
+Energy: 0.0182938
+Skewness: -0.00599087
+Kurtosis (Excess): -1.19613
+

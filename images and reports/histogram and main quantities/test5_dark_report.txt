@@ -1,0 +1,17 @@
+Test: Dark Image (0-50)
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 10000
+
+--- Statistical Metrics ---
+Mean: 24.4255
+Variance: 209.004
+Std Dev: 14.457
+Quartiles (Q1, Q2, Q3): 12, 24, 37
+Entropy: 5.63912
+Energy: 0.020132
+Skewness: 0.0145498
+Kurtosis (Excess): -1.19887
+

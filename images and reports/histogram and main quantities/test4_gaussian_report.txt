@@ -1,0 +1,17 @@
+Test: Gaussian-like Distribution
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 40000
+
+--- Statistical Metrics ---
+Mean: 128.353
+Variance: 1572.71
+Std Dev: 39.6575
+Quartiles (Q1, Q2, Q3): 101, 128, 155
+Entropy: 7.34606
+Energy: 0.00711572
+Skewness: 0.00744884
+Kurtosis (Excess): -0.0650473
+

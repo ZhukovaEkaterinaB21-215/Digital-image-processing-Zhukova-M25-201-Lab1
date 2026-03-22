@@ -1,0 +1,17 @@
+Test: Binary Image (0/255)
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 10000
+
+--- Statistical Metrics ---
+Mean: 127.5
+Variance: 16256.2
+Std Dev: 127.5
+Quartiles (Q1, Q2, Q3): 0, 0, 255
+Entropy: 1
+Energy: 0.5
+Skewness: 0
+Kurtosis (Excess): -2
+

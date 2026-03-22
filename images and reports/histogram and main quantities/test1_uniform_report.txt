@@ -1,0 +1,17 @@
+Test: Uniform Image (128)
+==================================================
+
+Image Analysis Report
+=====================
+Total Pixels: 10000
+
+--- Statistical Metrics ---
+Mean: 128
+Variance: 0
+Std Dev: 0
+Quartiles (Q1, Q2, Q3): 128, 128, 128
+Entropy: 0
+Energy: 1
+Skewness: 0
+Kurtosis (Excess): 0
+
