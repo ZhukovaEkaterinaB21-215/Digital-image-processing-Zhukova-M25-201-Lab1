@@ -1,0 +1,12 @@
+PSNR Analysis Report
+=====================
+
+--- Noise Parameters ---
+Mean: 0
+Variance: 400
+--- PSNR Metrics ---
+PSNR: 22.0914 dB
+MSE: 401.739
+--- Image Properties ---
+Width: 200
+Height: 200

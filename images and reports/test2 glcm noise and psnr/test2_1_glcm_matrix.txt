@@ -1,0 +1,6 @@
+GLCM Matrix
+===========
+
+(128,128): 1
+
+Total non-zero elements: 1
