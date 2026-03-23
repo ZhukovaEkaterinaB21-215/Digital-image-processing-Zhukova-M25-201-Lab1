@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 {
     //Tests1();
     //Tests2();
-    //Tests3();
+    Tests3();
     /*
     std::string inputPath = argv[1];
     cv::Mat image = cv::imread(inputPath, cv::IMREAD_GRAYSCALE);
@@ -115,12 +115,11 @@ int main(int argc, char** argv)
     }
     */
     
-    
-    
+    /*
     std::string inputPath = argv[1];
     cv::Mat image = cv::imread(inputPath, cv::IMREAD_GRAYSCALE);
 
-    /*
+    
     if (image.empty()) {
         std::cerr << "Error: Could not load image or image is not grayscale 8bpp.\n";
         return 1;
@@ -147,6 +146,7 @@ int main(int argc, char** argv)
         return 1;
     }
     */
+/*
     std::cout << "\nComputing projections\n";
 
     ProjectionData proj = ProjectionAnalyzer::computeProjections(image);
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
     ProjectionAnalyzer::saveProjections(proj, "user_projections.txt");
     ProjectionAnalyzer::saveHorizontalProjection(proj, "user_horizontal_projection.png");
     ProjectionAnalyzer::saveVerticalProjection(proj, "user_vertical_projection.png");
-    
+    */
     
     return 0;
 }

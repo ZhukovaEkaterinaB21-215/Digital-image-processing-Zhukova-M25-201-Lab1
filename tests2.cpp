@@ -18,6 +18,29 @@
 #define PATH_SEPARATOR "/"
 #endif
 
+static double generateGaussian(double mean, double stdDev) {
+    static bool hasSpare = false;
+    static double spare;
+
+    if (hasSpare) {
+        hasSpare = false;
+        return mean + stdDev * spare;
+    }
+
+    double u, v, s;
+    do {
+        u = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        v = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        s = u * u + v * v;
+    } while (s >= 1.0 || s == 0.0);
+
+    s = std::sqrt(-2.0 * std::log(s) / s);
+    spare = v * s;
+    hasSpare = true;
+
+    return mean + stdDev * u * s;
+}
+
 void Tests2() {
     std::string exePath = getExecutablePath();
     std::string outputDir = exePath + PATH_SEPARATOR + "test_results2" + PATH_SEPARATOR;
@@ -57,7 +80,26 @@ void Tests2() {
 
     {
         cv::Mat img(100, 100, CV_8UC1);
-        cv::randu(img, cv::Scalar(0), cv::Scalar(255));
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            initialized = true;
+        }
+
+        for (int y = 0; y < img.rows; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < img.cols; ++x) {
+                double t = static_cast<double>(std::rand()) / RAND_MAX;  // [0, 1]
+                double val = t * 255;
+
+
+                if (val < 0.0) val = 0.0;
+                if (val > 255.0) val = 255.0;
+
+                row[x] = static_cast<uchar>(val + 0.5);
+            }
+        }
+
 
         GLCM glcm1 = GLCMAnalyzer::computeGLCM(img, 1, 1);
         GLCM glcm2 = GLCMAnalyzer::computeGLCM(img, 2, 2);
@@ -112,13 +154,27 @@ void Tests2() {
     
     {
         cv::Mat img(100, 100, CV_8UC1);
-        cv::randn(img, cv::Scalar(128), cv::Scalar(40));
-        cv::threshold(img, img, 0, 255, cv::THRESH_TOZERO);
-        cv::threshold(img, img, 255, 255, cv::THRESH_TRUNC);
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            initialized = true;
+        }
+
+        for (int y = 0; y < img.rows; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < img.cols; ++x) {
+                double noise = generateGaussian(128.0, 40.0);
+
+                if (noise < 0.0) noise = 0.0;
+                if (noise > 255.0) noise = 255.0;
+
+                row[x] = static_cast<uchar>(noise + 0.5);
+            }
+        }
+
 
         GLCM glcm = GLCMAnalyzer::computeGLCM(img, 1, 1);
         GLCMFeatures features = GLCMAnalyzer::computeFeatures(glcm);
-
 
         GLCMAnalyzer::saveGLCM(glcm, outputDir + "test2_6_texture_matrix.txt");
         GLCMAnalyzer::saveReport(features, outputDir + "test2_6_texture_glcm_report.txt");

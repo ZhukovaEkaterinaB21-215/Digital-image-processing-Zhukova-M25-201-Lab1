@@ -1,5 +1,7 @@
 #include "tests1.h"
 #include "image_analyzer.h"
+#include "noise_psnr.h"
+#include "utils.h"
 #include "utils.h"
 
 #ifdef _WIN32
@@ -11,6 +13,34 @@
 #include <unistd.h>
 #define PATH_SEPARATOR "/"
 #endif
+
+
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+
+static double generateGaussian(double mean, double stdDev) {
+    static bool hasSpare = false;
+    static double spare;
+
+    if (hasSpare) {
+        hasSpare = false;
+        return mean + stdDev * spare;
+    }
+
+    double u, v, s;
+    do {
+        u = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        v = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+        s = u * u + v * v;
+    } while (s >= 1.0 || s == 0.0);
+
+    s = std::sqrt(-2.0 * std::log(s) / s);
+    spare = v * s;
+    hasSpare = true;
+
+    return mean + stdDev * u * s;
+}
 
 void Tests1() {
 
@@ -60,10 +90,27 @@ void Tests1() {
     }
 
     {
+
         cv::Mat img(200, 200, CV_8UC1);
-        cv::randn(img, cv::Scalar(128), cv::Scalar(40));
-        cv::threshold(img, img, 0, 255, cv::THRESH_TOZERO);
-        cv::threshold(img, img, 255, 255, cv::THRESH_TRUNC);
+
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            initialized = true;
+        }
+
+        for (int y = 0; y < img.rows; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < img.cols; ++x) {
+                double noise = generateGaussian(128.0, 40.0);
+
+                if (noise < 0.0) noise = 0.0;
+                if (noise > 255.0) noise = 255.0;
+
+                row[x] = static_cast<uchar>(noise + 0.5);
+            }
+        }
+
 
         auto stats = ImageAnalyzer::analyze(img);
 
@@ -74,7 +121,25 @@ void Tests1() {
 
     {
         cv::Mat img(100, 100, CV_8UC1);
-        cv::randu(img, cv::Scalar(0), cv::Scalar(50));
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            initialized = true;
+        }
+
+        for (int y = 0; y < img.rows; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < img.cols; ++x) {
+                double t = static_cast<double>(std::rand()) / RAND_MAX;  // [0, 1]
+                double val = 50*t;
+
+
+                if (val < 0.0) val = 0.0;
+                if (val > 255.0) val = 255.0;
+
+                row[x] = static_cast<uchar>(val + 0.5);
+            }
+        }
 
         auto stats = ImageAnalyzer::analyze(img);
 
@@ -85,7 +150,25 @@ void Tests1() {
 
     {
         cv::Mat img(100, 100, CV_8UC1);
-        cv::randu(img, cv::Scalar(200), cv::Scalar(255));
+        static bool initialized = false;
+        if (!initialized) {
+            std::srand(static_cast<unsigned>(std::time(nullptr)));
+            initialized = true;
+        }
+
+        for (int y = 0; y < img.rows; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < img.cols; ++x) {
+                double t = static_cast<double>(std::rand()) / RAND_MAX;  // [0, 1]
+                double val = 200 + t * 55;
+
+
+                if (val < 0.0) val = 0.0;
+                if (val > 255.0) val = 255.0;
+
+                row[x] = static_cast<uchar>(val + 0.5);
+            }
+        }
 
         auto stats = ImageAnalyzer::analyze(img);
 

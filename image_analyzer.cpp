@@ -136,9 +136,6 @@ void ImageAnalyzer::saveHistogramImage(const ImageStatistics& stats,
 }
 
 
-
-
-
 void ImageAnalyzer::saveTestImage(const cv::Mat& image, const std::string& filename) {
     bool saved = cv::imwrite(filename, image);
     if (saved) {

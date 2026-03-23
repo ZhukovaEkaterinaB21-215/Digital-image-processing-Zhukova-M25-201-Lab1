@@ -32,9 +32,20 @@ void Tests3() {
     }
 
     {
-        cv::Mat img(100, 100, CV_8UC1, cv::Scalar(0));
+        cv::Mat img(100, 100, CV_8UC1);
+        for (int y = 0; y < 100; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < 100; ++x) {
+                row[x] = 0;
+            }
+        }
+
         for (int x = 0; x < 100; x += 10) {
-            img(cv::Rect(x, 0, 5, 100)).setTo(255);
+            for (int stripeX = x; stripeX < x + 5 && stripeX < img.cols; ++stripeX) {
+                for (int y = 0; y < img.rows; ++y) {
+                    img.ptr<uchar>(y)[stripeX] = 255; 
+                }
+            }
         }
 
         ProjectionData proj = ProjectionAnalyzer::computeProjections(img);
@@ -47,9 +58,21 @@ void Tests3() {
     }
 
     {
-        cv::Mat img(100, 100, CV_8UC1, cv::Scalar(0));
+        cv::Mat img(100, 100, CV_8UC1);
+        for (int y = 0; y < 100; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = 0; x < 100; ++x) {
+                row[x] = 0;
+            }
+        }
+
         for (int y = 0; y < 100; y += 10) {
-            img(cv::Rect(0, y, 100, 5)).setTo(255);
+            for (int stripeY = y; stripeY < y + 5 && stripeY < img.rows; ++stripeY) {
+                uchar* row = img.ptr<uchar>(stripeY);
+                for (int x = 0; x < img.cols; ++x) {
+                    row[x] = 255;
+                }
+            }
         }
 
         ProjectionData proj = ProjectionAnalyzer::computeProjections(img);
