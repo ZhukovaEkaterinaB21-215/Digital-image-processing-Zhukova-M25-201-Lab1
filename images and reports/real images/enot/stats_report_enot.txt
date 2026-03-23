@@ -1,0 +1,14 @@
+Image Analysis Report
+=====================
+Total Pixels: 921600
+
+--- Statistical Metrics ---
+Mean: 108.772
+Variance: 1504.54
+Std Dev: 38.7885
+Quartiles (Q1, Q2, Q3): 91, 104, 126
+Entropy: 7.14991
+Energy: 0.0100434
+Skewness: 0.385494
+Kurtosis (Excess): 1.05825
+
