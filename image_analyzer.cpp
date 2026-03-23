@@ -31,7 +31,7 @@ ImageStatistics ImageAnalyzer::analyze(const cv::Mat& image) {
         stats.mean += i * probabilities[i];
     }
 
-    // 3. Дисперсия, Эксцесс, Ассиметрия
+    //Дисперсия, Эксцесс, Ассиметрия
     double varianceSum = 0.0;
     double skewnessSum = 0.0;
     double kurtosisSum = 0.0;
@@ -105,35 +105,39 @@ void ImageAnalyzer::saveReport(const ImageStatistics& stats,
     std::cout << "  [SAVE] Report: " << filename << "\n";
 }
 
+
 void ImageAnalyzer::saveHistogramImage(const ImageStatistics& stats,
     const std::string& filename) {
-    int h = 400, w = 512;
-    cv::Mat histImg = cv::Mat(h, w, CV_8UC3, cv::Scalar(255, 255, 255));
+    const int h = 400, w = 512;
+    cv::Mat histImg(h, w, CV_8U, cv::Scalar(255)); 
 
     long long maxVal = *std::max_element(stats.histogram.begin(), stats.histogram.end());
     if (maxVal == 0) maxVal = 1;
 
-    double binWidth = static_cast<double>(w) / 256.0;
+    const double binWidth = static_cast<double>(w) / 256.0;
 
     for (int i = 0; i < 256; ++i) {
-        double val = stats.histogram[i];
-        int barHeight = static_cast<int>((val / maxVal) * (h - 20));
-        cv::rectangle(histImg,
-            cv::Point(static_cast<int>(i * binWidth), h),
-            cv::Point(static_cast<int>((i + 1) * binWidth), h - barHeight),
-            cv::Scalar(0, 0, 0),
-            cv::FILLED);
+        int barHeight = static_cast<int>(static_cast<double>(stats.histogram[i]) / maxVal * (h - 20));
+        int x1 = static_cast<int>(i * binWidth);
+        int x2 = static_cast<int>((i + 1) * binWidth);
+        int y1 = h - barHeight;
+        int y2 = h;
+
+        for (int y = std::max(0, y1); y < std::min(h, y2); ++y) {
+            uchar* row = histImg.ptr<uchar>(y);
+            for (int x = std::max(0, x1); x < std::min(w, x2); ++x) {
+                row[x] = 0;
+            }
+        }
     }
 
-
-    bool saved = cv::imwrite(filename, histImg);
-    if (saved) {
-        std::cout << "  [SAVE] Histogram: " << filename << "\n";
-    }
-    else {
-        std::cerr << "  [ERROR] Failed to save histogram: " << filename << "\n";
-    }
+    cv::imwrite(filename, histImg);
+    std::cout << "  [SAVE] Histogram: " << filename << "\n";
 }
+
+
+
+
 
 void ImageAnalyzer::saveTestImage(const cv::Mat& image, const std::string& filename) {
     bool saved = cv::imwrite(filename, image);

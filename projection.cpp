@@ -63,124 +63,89 @@ void ProjectionAnalyzer::saveProjections(const ProjectionData& proj, const std::
     std::cout << "  [SAVE] Projections: " << filename << "\n";
 }
 
+
+
 void ProjectionAnalyzer::saveHorizontalProjection(const ProjectionData& proj,
     const std::string& filename,
     int plotHeight) {
-    try {
-        if (proj.horizontal.empty()) {
-            std::cerr << "  [WARNING] Empty horizontal projection\n";
-            return;
+    if (proj.horizontal.empty()) return;
+
+    const int margin = 40;
+    const int plotWidth = 400;
+    const int w = plotWidth + 2 * margin;
+    const int h = plotHeight + 2 * margin;
+
+    cv::Mat img(h, w, CV_8UC1, cv::Scalar(255));
+
+    int maxVal = *std::max_element(proj.horizontal.begin(), proj.horizontal.end());
+    if (maxVal == 0) maxVal = 1;
+
+    float yScale = static_cast<float>(plotHeight) / proj.height;
+
+    for (int i = 0; i < proj.height; ++i) {
+        int barWidth = static_cast<int>(static_cast<float>(proj.horizontal[i]) / maxVal * plotWidth);
+        barWidth = std::max(1, barWidth);
+
+        int x1 = margin;
+        int y1 = margin + static_cast<int>(i * yScale);
+        int x2 = x1 + barWidth;
+        int y2 = y1 + static_cast<int>(yScale);
+
+
+        y1 = std::max(margin, std::min(y1, h - margin));
+        y2 = std::max(y1 + 1, std::min(y2, h - margin));
+
+
+        for (int y = y1; y < y2; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = x1; x < x2; ++x) {
+                row[x] = 0; 
+            }
         }
-
-        int margin = 50;
-        int plotWidth = std::max(400, proj.height + 100);
-        int totalWidth = plotWidth + 2 * margin;
-        int totalHeight = plotHeight + 2 * margin;
-
-        cv::Mat visImage(totalHeight, totalWidth, CV_8UC1, cv::Scalar(255));
-
-        int maxVal = *std::max_element(proj.horizontal.begin(), proj.horizontal.end());
-        if (maxVal == 0) maxVal = 1;
-
-        float yScale = static_cast<float>(plotHeight - 20) / proj.height;
-        float xScale = static_cast<float>(plotWidth - 20) / maxVal;
-
-        for (int i = 0; i < proj.height; ++i) {
-            int barWidth = static_cast<int>(static_cast<float>(proj.horizontal[i]) / maxVal * (plotWidth - 20));
-            barWidth = std::max(1, barWidth);
-
-            int x1 = margin;
-            int y1 = margin + static_cast<int>(i * yScale);
-            int x2 = x1 + barWidth;
-            int y2 = y1 + static_cast<int>(yScale);
-
-            y1 = std::max(margin, std::min(y1, totalHeight - margin));
-            y2 = std::max(y1 + 1, std::min(y2, margin + plotHeight));
-
-            cv::rectangle(visImage,
-                cv::Point(x1, y1),
-                cv::Point(x2, y2),
-                cv::Scalar(0),
-                cv::FILLED);
-        }
-
-        cv::putText(visImage, "Horizontal Projection (Row Sums)",
-            cv::Point(margin, margin - 15),
-            cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0), 1);
-
-
-        bool saved = cv::imwrite(filename, visImage);
-        if (saved) {
-            std::cout << "  [SAVE] Horizontal Projection: " << filename << "\n";
-        }
-        else {
-            std::cerr << "  [ERROR] Failed to save horizontal projection\n";
-        }
-
     }
-    catch (const cv::Exception& e) {
-        std::cerr << "  [ERROR] Horizontal projection failed: " << e.what() << "\n";
-    }
+
+    cv::imwrite(filename, img);
+    std::cout << "  [SAVE] Horizontal Projection: " << filename << "\n";
 }
+
 
 void ProjectionAnalyzer::saveVerticalProjection(const ProjectionData& proj,
     const std::string& filename,
     int plotHeight) {
-    try {
-        if (proj.vertical.empty()) {
-            std::cerr << "  [WARNING] Empty vertical projection\n";
-            return;
+    if (proj.vertical.empty()) return;
+
+    const int margin = 40;
+    const int plotWidth = 400;
+    const int w = plotWidth + 2 * margin;
+    const int h = plotHeight + 2 * margin;
+
+    cv::Mat img(h, w, CV_8UC1, cv::Scalar(255));
+
+    int maxVal = *std::max_element(proj.vertical.begin(), proj.vertical.end());
+    if (maxVal == 0) maxVal = 1;
+
+    float xScale = static_cast<float>(plotWidth) / proj.width;
+
+    for (int i = 0; i < proj.width; ++i) {
+        int barHeight = static_cast<int>(static_cast<float>(proj.vertical[i]) / maxVal * plotHeight);
+        barHeight = std::max(1, barHeight);
+
+        int x1 = margin + static_cast<int>(i * xScale);
+        int y1 = margin + plotHeight - barHeight;
+        int x2 = x1 + static_cast<int>(xScale);
+        int y2 = margin + plotHeight;
+
+        x1 = std::max(margin, std::min(x1, w - margin));
+        x2 = std::max(x1 + 1, std::min(x2, w - margin));
+
+        for (int y = y1; y < y2; ++y) {
+            uchar* row = img.ptr<uchar>(y);
+            for (int x = x1; x < x2; ++x) {
+                row[x] = 0;
+            }
         }
-
-        int margin = 50;
-        int plotWidth = std::max(400, proj.width + 100);
-        int totalWidth = plotWidth + 2 * margin;
-        int totalHeight = plotHeight + 2 * margin;
-
-        cv::Mat visImage(totalHeight, totalWidth, CV_8UC1, cv::Scalar(255));
-
-        int maxVal = *std::max_element(proj.vertical.begin(), proj.vertical.end());
-        if (maxVal == 0) maxVal = 1;
-
-        float xScale = static_cast<float>(plotWidth - 20) / proj.width;
-        float yScale = static_cast<float>(plotHeight - 20) / maxVal;
-
-        for (int i = 0; i < proj.width; ++i) {
-            int barHeight = static_cast<int>(static_cast<float>(proj.vertical[i]) / maxVal * (plotHeight - 20));
-            barHeight = std::max(1, barHeight);
-
-            int x1 = margin + static_cast<int>(i * xScale);
-            int y1 = margin + plotHeight - barHeight;
-            int x2 = x1 + static_cast<int>(xScale);
-            int y2 = margin + plotHeight;
-
-            x1 = std::max(margin, std::min(x1, totalWidth - margin));
-            x2 = std::max(x1 + 1, std::min(x2, totalWidth - margin));
-
-            cv::rectangle(visImage,
-                cv::Point(x1, y1),
-                cv::Point(x2, y2),
-                cv::Scalar(0),
-                cv::FILLED);
-        }
-
-        cv::putText(visImage, "Vertical Projection (Column Sums)",
-            cv::Point(margin, margin - 15),
-            cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0), 1);
-
-
-        bool saved = cv::imwrite(filename, visImage);
-        if (saved) {
-            std::cout << "  [SAVE] Vertical Projection: " << filename << "\n";
-        }
-        else {
-            std::cerr << "  [ERROR] Failed to save vertical projection\n";
-        }
-
     }
-    catch (const cv::Exception& e) {
-        std::cerr << "  [ERROR] Vertical projection failed: " << e.what() << "\n";
-    }
+
+    cv::imwrite(filename, img);
+    std::cout << "  [SAVE] Vertical Projection: " << filename << "\n";
 }
-
-

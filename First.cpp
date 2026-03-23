@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     //Tests1();
     //Tests2();
     //Tests3();
-    
+    /*
     std::string inputPath = argv[1];
     cv::Mat image = cv::imread(inputPath, cv::IMREAD_GRAYSCALE);
 
@@ -77,9 +77,12 @@ int main(int argc, char** argv)
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
-    /*
+    */
 
     
+    
+
+    /*
     std::string inputPath = argv[1];
     cv::Mat image = cv::imread(inputPath, cv::IMREAD_GRAYSCALE);
 
@@ -91,17 +94,17 @@ int main(int argc, char** argv)
     try {
         std::cout << "Analyzing image: " << inputPath << " (" << image.cols << "x" << image.rows << ")\n";
 
-        int r = 5;
-        int c = 5;
+        int r = -10;
+        int c = -10;
 
         std::cout << "Computing GLCM (offset r=" << r << ", c=" << c << ") for: " << inputPath << "\n";
 
         GLCM glcm = GLCMAnalyzer::computeGLCM(image, r, c);
         GLCMFeatures features = GLCMAnalyzer::computeFeatures(glcm);
 
-        GLCMAnalyzer::saveGLCM(glcm, "glcm_matrix_kirpich.txt");
-        GLCMAnalyzer::saveReport(features, "glcm_report_kirpich.txt");
-        GLCMAnalyzer::saveGLCMVisualization(glcm, "user_glcm_gray_kirpich.png");
+        GLCMAnalyzer::saveGLCM(glcm, "glcm_matrix_kirpich_negative.txt");
+        GLCMAnalyzer::saveReport(features, "glcm_report_kirpich_negative.txt");
+        GLCMAnalyzer::saveGLCMVisualization(glcm, "user_glcm_gray_kirpich_negative.png");
         cv::waitKey(0);
         cv::destroyAllWindows();
 
@@ -110,11 +113,14 @@ int main(int argc, char** argv)
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
+    */
+    
+    
     
     std::string inputPath = argv[1];
     cv::Mat image = cv::imread(inputPath, cv::IMREAD_GRAYSCALE);
 
-    
+    /*
     if (image.empty()) {
         std::cerr << "Error: Could not load image or image is not grayscale 8bpp.\n";
         return 1;
@@ -129,8 +135,8 @@ int main(int argc, char** argv)
         std::cout << "PSNR: " << psnr.psnr << " dB\n";
         std::cout << "MSE: " << psnr.mse << "\n";
 
-        NoiseUtils::saveNoisyImage(noisy, "user_noisy_kirpich.png");
-        NoiseUtils::savePSNRReport(psnr, "user_psnr_kirpich.txt", params);
+        NoiseUtils::saveNoisyImage(noisy, "user_noisy_enot.png");
+        NoiseUtils::savePSNRReport(psnr, "user_psnr_enot.txt", params);
 
         cv::waitKey(0);
         cv::destroyAllWindows();
@@ -140,7 +146,7 @@ int main(int argc, char** argv)
         std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
-    
+    */
     std::cout << "\nComputing projections\n";
 
     ProjectionData proj = ProjectionAnalyzer::computeProjections(image);
@@ -148,8 +154,8 @@ int main(int argc, char** argv)
     ProjectionAnalyzer::saveProjections(proj, "user_projections.txt");
     ProjectionAnalyzer::saveHorizontalProjection(proj, "user_horizontal_projection.png");
     ProjectionAnalyzer::saveVerticalProjection(proj, "user_vertical_projection.png");
-
-    */
+    
+    
     return 0;
 }
 

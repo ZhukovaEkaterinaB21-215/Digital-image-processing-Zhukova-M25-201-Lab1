@@ -9,21 +9,29 @@ cv::Mat NoiseUtils::addGaussianNoise(const cv::Mat& image, const NoiseParameters
         throw std::runtime_error("Empty image for noise addition");
     }
 
-    cv::Mat noisyImage;
-    image.convertTo(noisyImage, CV_32F);
-
-    cv::Mat noise(image.size(), CV_32F);
-    cv::randn(noise, cv::Scalar(params.mean), cv::Scalar(params.stdDev));
-
-    noisyImage += noise;
-
-    cv::Mat result;
-    noisyImage.convertTo(result, CV_8U);
+    cv::Mat result(image.rows, image.cols, CV_8U);
 
     for (int y = 0; y < result.rows; ++y) {
-        uchar* ptr = result.ptr<uchar>(y);
+        const uchar* srcPtr = image.ptr<uchar>(y);
+        uchar* dstPtr = result.ptr<uchar>(y);
         for (int x = 0; x < result.cols; ++x) {
-            ptr[x] = std::max(0, std::min(255, static_cast<int>(ptr[x])));
+
+            double u, v, s;
+            s = 0;
+            while (s >= 1.0 || s == 0.0) {
+                u = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+                v = (std::rand() / static_cast<double>(RAND_MAX)) * 2.0 - 1.0;
+                s = u * u + v * v;
+            }
+            s = std::sqrt(-2.0 * std::log(s) / s);
+            double spare = v * s;
+            double noise = params.mean + params.stdDev * u * s;
+            double val = static_cast<double>(srcPtr[x]) + noise;
+
+            if (val < 0.0) val = 0.0;
+            if (val > 255.0) val = 255.0;
+
+            dstPtr[x] = static_cast<uchar>(val);
         }
     }
 
@@ -43,21 +51,26 @@ PSNRResult NoiseUtils::computePSNR(const cv::Mat& original, const cv::Mat& disto
         throw std::runtime_error("Image sizes must match for PSNR computation");
     }
 
-    cv::Mat s1;
-    cv::absdiff(original, distorted, s1);
-    s1.convertTo(s1, CV_32F);
+    long long sumSquaredDiff = 0;
+    size_t totalPixels = 0;
 
-    cv::Mat s2;
-    cv::multiply(s1, s1, s2);
+    for (int y = 0; y < original.rows; ++y) {
+        const uchar* ptr1 = original.ptr<uchar>(y);
+        const uchar* ptr2 = distorted.ptr<uchar>(y);
 
-    cv::Scalar s = cv::sum(s2);
+        for (int x = 0; x < original.cols; ++x) {
+            int diff = static_cast<int>(ptr1[x]) - static_cast<int>(ptr2[x]);
+            sumSquaredDiff += diff * diff;
+            totalPixels++;
+        }
+    }
 
-    double mse = s.val[0] / (original.total() * original.channels());
+    double mse = static_cast<double>(sumSquaredDiff) / totalPixels;
     result.mse = mse;
     result.rmse = std::sqrt(mse);
 
     if (mse < 1e-10) {
-        result.psnr = 100.0;
+        result.psnr = DBL_MAX;
     }
     else {
         result.psnr = 10.0 * std::log10((255.0 * 255.0) / mse);

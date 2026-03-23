@@ -8,19 +8,27 @@
 GLCM GLCMAnalyzer::computeGLCM(const cv::Mat& image, int r, int c, int levels) {
     GLCM glcm(levels, std::vector<double>(levels, 0.0));
 
-    if (image.empty() || image.rows <= r || image.cols <= c) {
+    if (image.empty() || image.rows <= abs(r) || image.cols <= abs(c)) {
         return glcm;
     }
 
-    for (int y = 0; y < image.rows - r; ++y) {
+    int rows = image.rows;
+    int cols = image.cols;
+
+    int yStart = (r >= 0) ? 0 : -r;
+    int yEnd = (r >= 0) ? rows - r : rows;
+    int xStart = (c >= 0) ? 0 : -c;
+    int xEnd = (c >= 0) ? cols - c : cols;
+
+    for (int y = yStart; y < yEnd; ++y) {
         const uchar* ptr1 = image.ptr<uchar>(y);
         const uchar* ptr2 = image.ptr<uchar>(y + r);
 
-        for (int x = 0; x < image.cols - c; ++x) {
+        for (int x = xStart; x < xEnd; ++x) {
             uchar p1 = ptr1[x];
             uchar p2 = ptr2[x + c];
             glcm[p1][p2] += 1.0;
-            glcm[p2][p1] += 1.0;
+
         }
     }
 
@@ -100,7 +108,10 @@ void GLCMAnalyzer::saveReport(const GLCMFeatures& features, const std::string& f
     std::cout << "  [SAVE] GLCM Report: " << filename << "\n";
 }
 
-void GLCMAnalyzer::saveGLCMVisualization(const GLCM& glcm, const std::string& filename, int imageSize) {
+
+void GLCMAnalyzer::saveGLCMVisualization(const GLCM& glcm,
+    const std::string& filename,
+    int imageSize) {
     try {
         if (glcm.empty() || glcm[0].empty()) {
             std::cerr << "  [WARNING] Empty GLCM, skipping visualization\n";
@@ -110,16 +121,12 @@ void GLCMAnalyzer::saveGLCMVisualization(const GLCM& glcm, const std::string& fi
         int levels = static_cast<int>(glcm.size());
         imageSize = std::max(256, std::min(1024, imageSize));
 
-        cv::Mat visImage(imageSize, imageSize, CV_8UC1, cv::Scalar(255));
+        cv::Mat result(imageSize, imageSize, CV_8UC1, cv::Scalar(255));
 
         double maxVal = 1e-10;
-        int nonZeroCount = 0;
-        for (int i = 0; i < levels; ++i) {
-            for (int j = 0; j < levels; ++j) {
-                if (glcm[i][j] > 1e-10) {
-                    if (glcm[i][j] > maxVal) maxVal = glcm[i][j];
-                    nonZeroCount++;
-                }
+        for (const auto& row : glcm) {
+            for (double val : row) {
+                if (val > maxVal) maxVal = val;
             }
         }
 
@@ -129,44 +136,34 @@ void GLCMAnalyzer::saveGLCMVisualization(const GLCM& glcm, const std::string& fi
             for (int j = 0; j < levels; ++j) {
                 if (glcm[i][j] < 1e-10) continue;
 
-
-                int normalized = static_cast<int>(255.0 * (glcm[i][j] / maxVal));
-                normalized = std::max(0, std::min(255, normalized));
-
-                int intensity = 255 - normalized;
+                int intensity = 255 - static_cast<int>(255.0 * glcm[i][j] / maxVal);
 
                 int x1 = static_cast<int>(j * cellSize);
                 int y1 = static_cast<int>(i * cellSize);
                 int x2 = static_cast<int>((j + 1) * cellSize);
                 int y2 = static_cast<int>((i + 1) * cellSize);
 
-                x1 = std::max(0, std::min(x1, imageSize - 1));
-                y1 = std::max(0, std::min(y1, imageSize - 1));
-                x2 = std::max(1, std::min(x2, imageSize));
-                y2 = std::max(1, std::min(y2, imageSize));
+                if (x1 >= imageSize || y1 >= imageSize) continue;
+                x2 = std::min(x2, imageSize);
+                y2 = std::min(y2, imageSize);
 
-                if (x2 > x1 && y2 > y1) {
-                    cv::rectangle(visImage,
-                        cv::Point(x1, y1),
-                        cv::Point(x2, y2),
-                        cv::Scalar(intensity),
-                        cv::FILLED);
+                for (int y = y1; y < y2; ++y) {
+                    uchar* row = result.ptr<uchar>(y);
+                    for (int x = x1; x < x2; ++x) {
+                        row[x] = static_cast<uchar>(intensity);
+                    }
                 }
             }
         }
 
-        bool saved = cv::imwrite(filename, visImage);
-        if (saved) {
-            std::cout << "  [SAVE] GLCM Visualization (grayscale): " << filename << "\n";
-            std::cout << "           Non-zero cells: " << nonZeroCount << "\n";
+
+        if (cv::imwrite(filename, result)) {
+            std::cout << "  [SAVE] GLCM Visualization: " << filename << "\n";
         }
         else {
             std::cerr << "  [ERROR] Failed to save GLCM visualization\n";
         }
 
-    }
-    catch (const cv::Exception& e) {
-        std::cerr << "  [ERROR] GLCM visualization failed: " << e.what() << "\n";
     }
     catch (const std::exception& e) {
         std::cerr << "  [ERROR] GLCM visualization failed: " << e.what() << "\n";
