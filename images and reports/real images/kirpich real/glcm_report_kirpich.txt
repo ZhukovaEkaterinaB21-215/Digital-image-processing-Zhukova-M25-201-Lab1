@@ -1,4 +1,0 @@
-GLCM Analysis Report
-=====================
-
-Energy: 0.000142152
