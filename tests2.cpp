@@ -19,13 +19,7 @@
 #endif
 
 static double generateGaussian(double mean, double stdDev) {
-    static bool hasSpare = false;
     static double spare;
-
-    if (hasSpare) {
-        hasSpare = false;
-        return mean + stdDev * spare;
-    }
 
     double u, v, s;
     do {
@@ -36,7 +30,6 @@ static double generateGaussian(double mean, double stdDev) {
 
     s = std::sqrt(-2.0 * std::log(s) / s);
     spare = v * s;
-    hasSpare = true;
 
     return mean + stdDev * u * s;
 }
@@ -80,12 +73,6 @@ void Tests2() {
 
     {
         cv::Mat img(100, 100, CV_8UC1);
-        static bool initialized = false;
-        if (!initialized) {
-            std::srand(static_cast<unsigned>(std::time(nullptr)));
-            initialized = true;
-        }
-
         for (int y = 0; y < img.rows; ++y) {
             uchar* row = img.ptr<uchar>(y);
             for (int x = 0; x < img.cols; ++x) {
@@ -129,7 +116,6 @@ void Tests2() {
     {
 
         cv::Mat original(100, 100, CV_8UC1, cv::Scalar(128));
-
         std::vector<double> variances = { 10.0, 25.0, 50.0, 100.0, 200.0, 400.0 };
         std::ofstream file(outputDir + "test2_5_psnr_comparison.txt");
         file << "PSNR vs Noise Variance\n";
@@ -154,12 +140,6 @@ void Tests2() {
     
     {
         cv::Mat img(100, 100, CV_8UC1);
-        static bool initialized = false;
-        if (!initialized) {
-            std::srand(static_cast<unsigned>(std::time(nullptr)));
-            initialized = true;
-        }
-
         for (int y = 0; y < img.rows; ++y) {
             uchar* row = img.ptr<uchar>(y);
             for (int x = 0; x < img.cols; ++x) {
